@@ -2,15 +2,45 @@
 import { useState } from "react"
 
 import Input from "./components/Input"
+import Current from "./components/Current"
+import WeekForecast from "./components/WeekForecast"
+import WeatherDetails from "./components/WeatherDetails"
+
+interface WeatherData {
+  current: {
+    condition: {
+      icon: string;
+      text: string;
+    };
+    temp_c: number;
+    wind_kph: number;
+    humidity: number;
+    wind_dir: string;
+    pressure_mb: number;
+    feelslike_c: number;
+    vis_km: number;
+  };
+  location: {
+    name: string;
+    region: string;
+  };
+  forecast: {
+    forecastday: {
+      astro: {
+        sunrise: string;
+        sunset: string;
+      }[];
+    }[];
+  };
+}
 
 export default function Home() {
 
-  const [data, setData] = useState({})
+  const [data, setData] = useState<WeatherData | null>(null)
   const [location, setLocation] = useState("")
   const [error, setError] = useState("")
 
   const url = `http://api.weatherapi.com/v1/forecast.json?key=129341df74cc4045b08222535232505&q=${location}&days=7&aqi=yes&alerts=yes`
-  console.log(process.env.REACT_APP_API_KEY);
 
   const handleSearch = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if(e.key === "Enter"){
@@ -25,21 +55,50 @@ export default function Home() {
         setLocation('')
         setError('')
       } catch(err){
-        return null
+        setError("City not found")
+        setData(null)
       }
     }
   }
 
+  let content
+
+  if(data === null && error === ""){
+    content = (
+      <div className="text-white text-center h-screen mt-[5rem]">
+        <h2 className="text-3xl font-bold mb-4">Welcome to the weather app</h2>
+        <p className="text-xl">Enter a city name to get the weather forecast</p>
+      </div>
+    )
+  } else if(error !== ''){
+    content = (
+      <div className="text-white text-center h-screen mt-[5rem]">
+        <p className="text-3xl font-bold mb-4">City not found</p>
+        <p className="text-xl">Enter a valid city</p>
+      </div>
+    )
+  } else {
+    content = (
+      <>
+        <div className="flex md:flex-row flex-col p-12 items-center justify-between">
+          <Current data={data!}/>
+          <WeekForecast data={data!}/>
+        </div>
+        <div>
+          <WeatherDetails data={data!}/>
+        </div>
+      </>
+    )
+  }
+
   return (
-      <div className='bg-cover bg-gradient-to-r from-blue-500 to-blue-300 h-screen'>
+      <div className='bg-cover bg-gradient-to-r from-blue-500 to-blue-300 h-fit lg:h-screen'>
         <div className="bg-white/25 w-full flex flex-col h-fit">
           <div className="flex flex-col md:flex-row justify-between items-center p-12">
             <Input handleSearch={handleSearch} setLocation={setLocation}/>
             <h1 className="mb-8 md:mb-0 order-1 text-white py-2 px-4 rounded-xl italic font-bold">Weather App.</h1>
           </div>
-          {data.current ? (
-            <div>{data.current.temp_f}</div>
-          ) : null}
+          {content}
         </div>
       </div>
   )
