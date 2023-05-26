@@ -6,37 +6,11 @@ import Current from "./components/Current"
 import WeekForecast from "./components/WeekForecast"
 import WeatherDetails from "./components/WeatherDetails"
 
-interface WeatherData {
-  current: {
-    condition: {
-      icon: string;
-      text: string;
-    };
-    temp_c: number;
-    wind_kph: number;
-    humidity: number;
-    wind_dir: string;
-    pressure_mb: number;
-    feelslike_c: number;
-    vis_km: number;
-  };
-  location: {
-    name: string;
-    region: string;
-  };
-  forecast: {
-    forecastday: {
-      astro: {
-        sunrise: string;
-        sunset: string;
-      }[];
-    }[];
-  };
-}
+
 
 export default function Home() {
 
-  const [data, setData] = useState<WeatherData | null>(null)
+  const [data, setData] = useState(null)
   const [location, setLocation] = useState("")
   const [error, setError] = useState("")
 
